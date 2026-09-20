@@ -72,6 +72,52 @@ interface PendingEvent {
   change: TreeChange
 }
 
+// 打开文件夹时告知版本管理的边界：已是 git 仓库则提示只管理 markdown+图片；
+// 否则询问是否初始化（拒绝后仍是普通编辑器，可在 Git 面板随时初始化）。
+const GIT_HINTED_KEY = 'marktext-git-scope-hinted'
+const checkGitScope = async(pathname: string): Promise<void> => {
+  try {
+    if (await window.git.isRepo(pathname)) {
+      let hinted: string[] = []
+      try {
+        hinted = JSON.parse(localStorage.getItem(GIT_HINTED_KEY) || '[]') as string[]
+      } catch {
+        hinted = []
+      }
+      if (hinted.includes(pathname)) return
+      localStorage.setItem(GIT_HINTED_KEY, JSON.stringify([...hinted, pathname].slice(-50)))
+      notice.notify({
+        title: '已启用版本管理',
+        message: 'Git 面板只管理 markdown 与图片，其他文件不参与版本管理。',
+        type: 'info',
+        time: 8000
+      })
+      return
+    }
+    notice
+      .notify({
+        title: '是否启用版本管理？',
+        message: '当前文件夹还不是 Git 仓库，是否初始化？（版本管理只处理 markdown 与图片）',
+        type: 'primary',
+        showConfirm: true,
+        time: 15000
+      })
+      .then(async() => {
+        await window.git.init(pathname)
+        notice.notify({
+          title: '已初始化 Git 仓库',
+          message: '版本管理已启用。',
+          type: 'primary'
+        })
+      })
+      .catch(() => {
+        // 用户拒绝初始化：保持普通编辑器模式，可在 Git 面板随时初始化。
+      })
+  } catch {
+    // 探测失败时静默，不打扰用户打开文件夹。
+  }
+}
+
 export const useProjectStore = defineStore('project', () => {
   // Heterogeneous UI state: assigned file nodes, folder nodes, and the empty
   // "no selection" object/null across sidebar components; a single non-`any`
@@ -123,6 +169,8 @@ export const useProjectStore = defineStore('project', () => {
     if (scheduleBufferUpdate) {
       debouncedSendBufferedState()
     }
+
+    checkGitScope(pathname)
   }
 
   function CREATE_BUFFERED_STATE(): BufferedProjectState {

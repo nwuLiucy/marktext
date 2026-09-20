@@ -228,6 +228,24 @@ const fontsAPI = {
   list: () => invoke('mt::fonts::list')
 }
 
+const gitAPI = {
+  isRepo: (dirPath: string) => invoke('mt::git::is-repo', dirPath),
+  init: (dirPath: string) => invoke('mt::git::init', dirPath),
+  status: (dirPath: string) => invoke('mt::git::status', dirPath),
+  log: (dirPath: string, limit?: number) => invoke('mt::git::log', dirPath, limit),
+  diff: (dirPath: string, hash?: string) => invoke('mt::git::diff', dirPath, hash),
+  commitFiles: (dirPath: string, files: string[], message: string) =>
+    invoke('mt::git::commit-files', dirPath, files, message),
+  branches: (dirPath: string) => invoke('mt::git::branches', dirPath),
+  checkoutBranch: (dirPath: string, branch: string) =>
+    invoke('mt::git::checkout-branch', dirPath, branch),
+  createBranch: (dirPath: string, name: string, checkout?: boolean) =>
+    invoke('mt::git::create-branch', dirPath, name, checkout),
+  restore: (dirPath: string, hash: string) => invoke('mt::git::restore', dirPath, hash),
+  show: (dirPath: string, hash: string, filePath: string) =>
+    invoke('mt::git::show', dirPath, hash, filePath)
+}
+
 const electronAPI = {
   ipcRenderer: ipcWrapper,
   shell: shellAPI,
@@ -296,6 +314,7 @@ try {
   contextBridge.exposeInMainWorld('ripgrep', ripgrepAPI)
   contextBridge.exposeInMainWorld('uploader', uploaderAPI)
   contextBridge.exposeInMainWorld('fonts', fontsAPI)
+  contextBridge.exposeInMainWorld('git', gitAPI)
 } catch (error) {
   console.error(error)
 }

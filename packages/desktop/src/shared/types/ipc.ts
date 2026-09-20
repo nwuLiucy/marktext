@@ -32,6 +32,7 @@ import type {
 } from './files'
 import type { BufferedState as BufferedStateType } from './bufferedState'
 import type { MenuTemplate, MenuPopupPosition } from './menu'
+import type { GitBranchInfo, GitCommitInfo, GitStatusInfo } from './git'
 
 // =================================================================
 // Invoke channels (renderer → main, returns Promise<T>)
@@ -81,6 +82,17 @@ export interface IpcInvokeChannels {
   'mt::uploader::upload': { args: [req: unknown]; ret: unknown }
   'mt::win::is-fullscreen': { args: []; ret: boolean }
   'mt::win::is-maximized': { args: []; ret: boolean }
+  'mt::git::is-repo': { args: [dirPath: string]; ret: boolean }
+  'mt::git::init': { args: [dirPath: string]; ret: void }
+  'mt::git::status': { args: [dirPath: string]; ret: GitStatusInfo }
+  'mt::git::log': { args: [dirPath: string, limit?: number]; ret: GitCommitInfo[] }
+  'mt::git::diff': { args: [dirPath: string, hash?: string]; ret: string }
+  'mt::git::commit-files': { args: [dirPath: string, files: string[], message: string]; ret: string }
+  'mt::git::branches': { args: [dirPath: string]; ret: GitBranchInfo }
+  'mt::git::checkout-branch': { args: [dirPath: string, branch: string]; ret: void }
+  'mt::git::create-branch': { args: [dirPath: string, name: string, checkout?: boolean]; ret: void }
+  'mt::git::restore': { args: [dirPath: string, hash: string]; ret: void }
+  'mt::git::show': { args: [dirPath: string, hash: string, filePath: string]; ret: string }
   // Main derives the BrowserWindow via BrowserWindow.fromWebContents(e.sender);
   // no need to pass windowId. Payload is the editor+project+layout snapshot.
   'update-buffer-state': { args: [payload: unknown]; ret: void }

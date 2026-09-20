@@ -12,6 +12,7 @@ import type {
 } from '@shared/types/ipc'
 import type { MenuTemplate, MenuPopupPosition } from '@shared/types/menu'
 import type { SerializedStat } from '@shared/types/files'
+import type { GitBranchInfo, GitCommitInfo, GitStatusInfo } from '@shared/types/git'
 
 declare global {
   // ---- Build-time defines (electron-vite `define`) ----
@@ -166,6 +167,20 @@ declare global {
     list(): Promise<string[]>
   }
 
+  interface GitAPI {
+    isRepo(dirPath: string): Promise<boolean>
+    init(dirPath: string): Promise<void>
+    status(dirPath: string): Promise<GitStatusInfo>
+    log(dirPath: string, limit?: number): Promise<GitCommitInfo[]>
+    diff(dirPath: string, hash?: string): Promise<string>
+    commitFiles(dirPath: string, files: string[], message: string): Promise<string>
+    branches(dirPath: string): Promise<GitBranchInfo>
+    checkoutBranch(dirPath: string, branch: string): Promise<void>
+    createBranch(dirPath: string, name: string, checkout?: boolean): Promise<void>
+    restore(dirPath: string, hash: string): Promise<void>
+    show(dirPath: string, hash: string, filePath: string): Promise<string>
+  }
+
   interface ProcessShim {
     platform: NodeJS.Platform
     arch?: string
@@ -185,6 +200,7 @@ declare global {
     ripgrep: RipgrepAPI
     uploader: UploaderAPI
     fonts: FontsAPI
+    git: GitAPI
     process: ProcessShim
     rgPath: string
     // Set by the legacy editor store at runtime; consumed by muya internals.
