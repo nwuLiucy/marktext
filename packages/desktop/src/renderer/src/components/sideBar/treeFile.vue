@@ -3,7 +3,7 @@
     ref="fileEl"
     :title="file.pathname"
     class="side-bar-file"
-    :style="{ 'padding-left': `${depth * 6 + 10}px`, opacity: file.isMarkdown ? 1 : 0.75 }"
+    :style="{ 'padding-left': `${depth * 6 + 10}px`, opacity: file.isMarkdown || file.isImage ? 1 : 0.75 }"
     :class="[
       { current: currentFile?.pathname === file.pathname, active: file.id === activeItem.id }
     ]"
@@ -31,6 +31,7 @@ import { useEditorStore } from '@/store/editor'
 import FileIcon from './icon.vue'
 import { showContextMenu } from '../../contextMenu/sideBar'
 import bus from '../../bus'
+import { localPathToFileUrl } from '../../util/fileUrl'
 import type { TreeFileNode } from './types'
 
 const props = defineProps<{
@@ -52,7 +53,11 @@ const { currentFile, tabs } = storeToRefs(editorStore)
 
 // from fileMixins
 const handleFileClick = (): void => {
-  const { isMarkdown, pathname } = props.file
+  const { isMarkdown, isImage, pathname } = props.file
+  if (isImage) {
+    bus.emit('sidebar-preview-image', localPathToFileUrl(pathname))
+    return
+  }
   if (!isMarkdown) return
   const openedTab = tabs.value.find((f) => window.fileUtils.isSamePathSync(f.pathname, pathname))
   if (openedTab) {

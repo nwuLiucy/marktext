@@ -107,6 +107,15 @@ export const hasMarkdownExtension = (filename: string): boolean => {
 }
 
 /**
+ * Returns true if the filename matches one of the image extensions.
+ */
+export const hasImageExtension = (filename: string): boolean => {
+  if (!filename || typeof filename !== 'string') return false
+  const ext = path.extname(filename).slice(1).toLowerCase()
+  return !!ext && IMAGE_EXTENSIONS.includes(ext)
+}
+
+/**
  * Returns true if the path is an image file.
  */
 export const isImageFile = (filepath: string): boolean => {

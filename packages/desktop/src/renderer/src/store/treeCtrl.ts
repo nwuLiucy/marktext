@@ -27,6 +27,7 @@ interface TreeFile {
   isDirectory: false
   isFile: true
   isMarkdown: boolean
+  isImage?: boolean
 }
 
 type AddFileInput = Omit<TreeFile, 'id'>
@@ -111,6 +112,7 @@ export const addFile = (tree: TreeFolder, file: AddFileInput, sortBy: string = '
       isDirectory: file.isDirectory,
       isFile: file.isFile,
       isMarkdown: file.isMarkdown,
+      isImage: file.isImage,
       name: file.name,
       pathname: file.pathname
     }

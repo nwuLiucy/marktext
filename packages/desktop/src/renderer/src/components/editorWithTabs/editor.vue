@@ -1064,6 +1064,18 @@ const setImageViewerVisible = (status: boolean) => {
   }
 }
 
+// 从侧边栏点击图片文件时打开查看器（URL 为本地 file:// 路径）。
+const handlePreviewImageFromSidebar = (url: unknown): void => {
+  if (typeof url !== 'string') return
+  if (imageViewer) {
+    imageViewer.destroy()
+  }
+  if (imageViewerRef.value) {
+    imageViewer = new SimpleImageViewer(imageViewerRef.value, { url })
+    setImageViewerVisible(true)
+  }
+}
+
 const switchSpellcheckLanguage = (languageCode: unknown) => {
   const { isEnabled } = spellchecker
 
@@ -1915,6 +1927,7 @@ onMounted(() => {
   bus.on('switch-spellchecker-language', switchSpellcheckLanguage)
   bus.on('open-command-spellchecker-switch-language', openSpellcheckerLanguageCommand)
   bus.on('replace-misspelling', replaceMisspelling)
+  bus.on('sidebar-preview-image', handlePreviewImageFromSidebar)
 
   // The engine emits a low-level `json-change` ({ op, source, prevDoc, doc })
   // on every document mutation; the desktop's content-change pipeline wants the
